@@ -32,8 +32,8 @@ function Game.getVertBase()
 	end
 end
 
-function Game.getWaterVertBase()
-	local mapModel = dereferencePointer(Game.Memory.water_model_pointer);
+function Game.getTransparentVertBase()
+	local mapModel = dereferencePointer(Game.Memory.transparent_model_pointer);
 	if isRDRAM(mapModel) then
 		return Game.getVertsFromModel(mapModel);
 	end
@@ -42,9 +42,9 @@ end
 function Game.getSeamDist()
 	local verts = {};
 	if Game.isInWater() and not ScriptHawk.UI.isChecked("never_test_water") then
-		verts[0] = Game.getWaterTriangleVertPositionRaw(0);
-		verts[1] = Game.getWaterTriangleVertPositionRaw(1);
-		verts[2] = Game.getWaterTriangleVertPositionRaw(2);
+		verts[0] = Game.getTransparentTriangleVertPositionRaw(0);
+		verts[1] = Game.getTransparentTriangleVertPositionRaw(1);
+		verts[2] = Game.getTransparentTriangleVertPositionRaw(2);
 	else
 		verts[0] = Game.getFloorTriangleVertPositionRaw(0);
 		verts[1] = Game.getFloorTriangleVertPositionRaw(1);
@@ -75,7 +75,7 @@ end
 function Game.getFloorTriangleVertPosition(index)
 	local vert = nil;
 	if Game.isInWater() and not ScriptHawk.UI.isChecked("never_test_water") then
-		vert = Game.getWaterTriangleVertPositionRaw(index);
+		vert = Game.getTransparentTriangleVertPositionRaw(index);
 	else
 		vert = Game.getFloorTriangleVertPositionRaw(index);
 	end
@@ -106,7 +106,7 @@ function Game.getFloorTriangleVertPositionRaw(index)
 	end
 end
 
-function Game.getWaterTriangleVertPositionRaw(index)
+function Game.getTransparentTriangleVertPositionRaw(index)
 	if type(index) ~= 'number' then
 		return;
 	end
@@ -116,7 +116,7 @@ function Game.getWaterTriangleVertPositionRaw(index)
 	local floorObject = Game.getFloorObject();
 	if isRDRAM(floorObject) then
 		local vertIndex = mainmemory.read_u16_be(floorObject + 0x10 + index * 0x02);
-		local vertBase = Game.getWaterVertBase();
+		local vertBase = Game.getTransparentVertBase();
 		if isRDRAM(vertBase) then
 			return {
 				x = mainmemory.read_s16_be(vertBase + (vertIndex * 0x10) + 0x00),
@@ -136,7 +136,7 @@ function Game.zipToFloorVert(index)
 	end
 	local vert = nil;
 	if Game.isInWater() and not ScriptHawk.UI.isChecked("never_test_water") then
-		vert = Game.getWaterTriangleVertPositionRaw(index);
+		vert = Game.getTransparentTriangleVertPositionRaw(index);
 	else
 		vert = Game.getFloorTriangleVertPositionRaw(index);
 	end
@@ -205,8 +205,8 @@ seamTester.testSeamFromUI = function()
 	if vertLookup[level] ~= nil then
 		if Game.isInWater() and not ScriptHawk.UI.isChecked("never_test_water") then
 			seamTester.testType = "water";
-			local vert1 = Game.getWaterTriangleVertPositionRaw(vertLookup[level][1]);
-			local vert2 = Game.getWaterTriangleVertPositionRaw(vertLookup[level][2]);
+			local vert1 = Game.getTransparentTriangleVertPositionRaw(vertLookup[level][1]);
+			local vert2 = Game.getTransparentTriangleVertPositionRaw(vertLookup[level][2]);
 			seamTester.testSeam(vert1.x, vert1.z, vert2.x, vert2.z, vert1.y, vert2.y);
 		else
 			seamTester.testType = "floor";
